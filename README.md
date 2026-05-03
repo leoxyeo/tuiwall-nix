@@ -79,7 +79,3 @@ All runtime dependencies are automatically injected via `wrapProgram`:
 | `python3` | Running preset scripts (stdlib only) |
 | `gh` | `tuiwall upload/search` - community features |
 | `vhs` | `tuiwall record` - recording demo GIFs |
-
-## License
-
-Nix packaging is licensed under MIT. The tuiwall source code is subject to its own [license](https://github.com/Mug-Costanza/tuiwall/blob/main/LICENSE.md).
