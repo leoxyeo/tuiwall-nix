@@ -7,7 +7,7 @@ A Nix Flake for [tuiwall](https://github.com/Mug-Costanza/tuiwall), a CLI wallpa
 Run `tuiwall` instantly without installing it:
 
 ```bash
-nix run github:your-username/tuiwall-nix
+nix run github:leoxyeo/tuiwall-nix
 ```
 
 ## 🛠 Installation
@@ -16,7 +16,7 @@ nix run github:your-username/tuiwall-nix
 To install it to your user profile:
 
 ```bash
-nix profile install github:your-username/tuiwall-nix
+nix profile install github:leoxyeo/tuiwall-nix
 ```
 
 ### 2. NixOS Configuration (Flakes)
