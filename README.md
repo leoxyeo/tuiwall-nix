@@ -26,7 +26,7 @@ Add this repository to your `flake.nix` inputs:
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    tuiwall.url = "github:your-username/tuiwall-nix";
+    tuiwall.url = "github:leoxyeo/tuiwall-nix";
   };
 
   outputs = { self, nixpkgs, tuiwall, ... }: {
