@@ -1,26 +1,29 @@
 {
-  description = "A Nix Flake for tuiwall - CLI wallpaper engine for the terminal";
+  description = "Nix flake for tuiwall - tmux terminal wallpaper engine";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    utils.url = "github:numtide/flake-utils";
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs = { self, nixpkgs, utils }:
-    utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in
-      {
-        packages.tuiwall = pkgs.callPackage ./package.nix { };
-        packages.default = self.packages.${system}.tuiwall;
+  outputs = { self, nixpkgs }:
+    let
+      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forEachSystem = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
+    in
+    {
+      packages = forEachSystem (pkgs:
+        let tuiwall = pkgs.callPackage ./package.nix { };
+        in {
+          inherit tuiwall;
+          default = tuiwall;
+        });
 
-        apps.tuiwall = utils.lib.mkApp { drv = self.packages.${system}.tuiwall; };
-        apps.default = self.apps.${system}.tuiwall;
+      overlays.default = final: _prev: {
+        tuiwall = final.callPackage ./package.nix { };
+      };
 
-        devShells.default = pkgs.mkShell {
-          buildInputs = [ self.packages.${system}.tuiwall ];
-        };
-      }
-    );
+      # Удобный nixosModule для тех, кто хочет добавить tuiwall одной строкой
+      nixosModules.default = { pkgs, ... }: {
+        nixpkgs.overlays = [ self.overlays.default ];
+        environment.systemPackages = [ pkgs.tuiwall ];
+      };
+    };
 }

@@ -1,4 +1,6 @@
-{ lib, buildGoModule, fetchFromGitHub, makeWrapper, tmux, git, gh, vhs, python3 }:
+{ lib, buildGoModule, fetchFromGitHub, makeWrapper
+, tmux, git, gh, vhs, python3
+}:
 
 buildGoModule rec {
   pname = "tuiwall";
@@ -17,13 +19,20 @@ buildGoModule rec {
 
   postInstall = ''
     wrapProgram $out/bin/tuiwall \
-      --prefix PATH : ${lib.makeBinPath [ tmux git gh vhs python3 ]}
+      --prefix PATH : ${lib.makeBinPath [
+        tmux      # основная зависимость - создаёт split-pane сессии
+        git       # нужен для работы с preset репозиториями
+        gh        # github cli - для tuiwall upload/search (community features)
+        vhs       # только для tuiwall record - запись демо GIF
+        python3   # runtime для запуска preset-скриптов (стандартная библиотека)
+      ]}
   '';
 
   meta = with lib; {
-    description = "CLI wallpaper engine for the terminal";
+    description = "CLI wallpaper engine for the terminal via tmux split panes";
     homepage = "https://github.com/Mug-Costanza/tuiwall";
     license = licenses.mit;
     mainProgram = "tuiwall";
+    platforms = platforms.unix;
   };
 }

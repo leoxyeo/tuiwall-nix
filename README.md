@@ -1,38 +1,36 @@
 # tuiwall-nix
 
-A Nix Flake for [tuiwall](https://github.com/Mug-Costanza/tuiwall), a CLI wallpaper engine for the terminal that creates customizable split-pane headers in `tmux`.
+Nix flake for [tuiwall](https://github.com/Mug-Costanza/tuiwall) — a tmux-based terminal wallpaper engine.
 
-## 🚀 Quick Start
-
-Run `tuiwall` instantly without installing it:
+## Quick Start
 
 ```bash
 nix run github:leoxyeo/tuiwall-nix
 ```
 
-## 🛠 Installation
+## Installation
 
-### 1. Nix Profile
-To install it to your user profile:
+### Nix Profile
 
 ```bash
 nix profile install github:leoxyeo/tuiwall-nix
 ```
 
-### 2. NixOS Configuration (Flakes)
-Add this repository to your `flake.nix` inputs:
+### NixOS (via overlay — recommended)
+
+In your `flake.nix`:
 
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    tuiwall.url = "github:leoxyeo/tuiwall-nix";
+    tuiwall-nix.url = "github:leoxyeo/tuiwall-nix";
   };
 
-  outputs = { self, nixpkgs, tuiwall, ... }: {
+  outputs = { self, nixpkgs, tuiwall-nix, ... }: {
     nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
-      specialArgs = { inherit tuiwall; };
       modules = [
+        { nixpkgs.overlays = [ tuiwall-nix.overlays.default ]; }
         ./configuration.nix
       ];
     };
@@ -40,23 +38,48 @@ Add this repository to your `flake.nix` inputs:
 }
 ```
 
-Then, add it to your `systemPackages` in `configuration.nix`:
+Then in `configuration.nix`:
 
 ```nix
-{ pkgs, tuiwall, ... }: {
-  environment.systemPackages = [
-    tuiwall.packages.${pkgs.system}.default
-  ];
+{ pkgs, ... }: {
+  environment.systemPackages = [ pkgs.tuiwall ];
 }
 ```
 
-## 📦 Dependencies Included
-This flake automatically wraps `tuiwall` with the following runtime dependencies:
-- `tmux`
-- `git`
-- `gh` (GitHub CLI)
-- `vhs`
-- `python3`
+### NixOS (via nixosModule — one-liner)
 
-## ⚖️ License
-The Nix packaging is licensed under the MIT License. The `tuiwall` source code is subject to its own [original license](https://github.com/Mug-Costanza/tuiwall/blob/main/LICENSE.md).
+Adds tuiwall to `systemPackages` automatically:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    tuiwall-nix.url = "github:leoxyeo/tuiwall-nix";
+  };
+
+  outputs = { self, nixpkgs, tuiwall-nix, ... }: {
+    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
+      modules = [
+        tuiwall-nix.nixosModules.default
+        ./configuration.nix
+      ];
+    };
+  };
+}
+```
+
+## Dependencies
+
+All runtime dependencies are automatically injected via `wrapProgram`:
+
+| Package | Purpose |
+|---------|---------|
+| `tmux` | Core dependency - manages split-pane sessions |
+| `git` | Fetching and managing preset repositories |
+| `python3` | Running preset scripts (stdlib only) |
+| `gh` | `tuiwall upload/search` - community features |
+| `vhs` | `tuiwall record` - recording demo GIFs |
+
+## License
+
+Nix packaging is licensed under MIT. The tuiwall source code is subject to its own [license](https://github.com/Mug-Costanza/tuiwall/blob/main/LICENSE.md).
